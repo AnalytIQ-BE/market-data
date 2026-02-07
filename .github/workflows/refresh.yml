@@ -1,7 +1,8 @@
 name: Refresh Cephu Data
 on:
   schedule:
-    - cron: '*/15 * * * *' # Elke 15 minuten (tijdens beurstijden)
+  # Draait elke 5 minuten van ma t/m vr, tussen 14:00 en 22:00 UTC
+    - cron: '*/5 14-22 * * 1-5'
   workflow_dispatch: # Hiermee kun je het ook handmatig starten
 
 jobs:
