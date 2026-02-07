@@ -1,9 +1,9 @@
 name: Refresh Cephu Data
 on:
   schedule:
-  # Draait elke 5 minuten van ma t/m vr, tussen 14:00 en 22:00 UTC
+    # Draait elke 5 minuten van ma t/m vr, tussen 14:00 en 22:00 UTC
     - cron: '*/5 14-22 * * 1-5'
-  workflow_dispatch: # Hiermee kun je het ook handmatig starten
+  workflow_dispatch:
 
 jobs:
   build:
@@ -11,20 +11,35 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
+
       - name: Set up Python
         uses: actions/setup-python@v2
         with:
           python-version: '3.9'
+
       - name: Install dependencies
         run: pip install -r requirements.txt
-      - name: Run script
-        run: python cephu_analysis.py
-        env:
-          IBKR_USER: ${{ secrets.IBKR_USER }} # Als je inloggegevens nodig hebt
-      - name: Commit and push if changed
+
+      - name: Run refresh loop
         run: |
-          git config --global user.name 'Cephu Automation'
-          git config --global user.email 'automation@cephu.com'
-          git add index.html
-          git commit -m "Auto-update market data" || exit 0
-          git push
+          # Dit script draait 4,5 minuut en update elke 30 seconden
+          python -c "
+          import os, time, subprocess
+          from datetime import datetime
+          
+          start_time = time.time()
+          while (time.time() - start_time) < 270:  # Draai voor 4,5 minuut
+              print(f'Starting update at {datetime.now()}')
+              # Draai je analyse script
+              subprocess.run(['python', 'cephu_analysis.py'])
+              
+              # Push de wijzigingen naar GitHub
+              subprocess.run(['git', 'config', '--global', 'user.name', 'Cephu Automation'])
+              subprocess.run(['git', 'config', '--global', 'user.email', 'automation@cephu.com'])
+              subprocess.run(['git', 'add', 'index.html'])
+              subprocess.run(['git', 'commit', '-m', 'Auto-update market data'], check=False)
+              subprocess.run(['git', 'push'])
+              
+              print('Update complete. Waiting 30 seconds...')
+              time.sleep(30)
+          "
