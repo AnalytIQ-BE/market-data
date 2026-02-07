@@ -6,9 +6,13 @@ from datetime import datetime, timedelta
 
 def generate_cephu_chart():
     # 1. Data ophalen (ES=F is de E-mini S&P 500 Future, ^GSPC is de SPX Index)
-    # We halen 2 dagen aan 1-minuut data op
-    future = yf.download("ES=F", period="2d", interval="1m")
-    index = yf.download("^GSPC", period="2d", interval="1m")
+    # We halen 5 dagen aan 1-minuut data op
+    future = yf.download("ES=F", period="5d", interval="1m", progress=False)
+    index = yf.download("^GSPC", period="5d", interval="1m", progress=False)
+
+    if future.empty or index.empty:
+        print("Geen data van yfinance. GitHub Action stopt hier.")
+        exit(0)
 
     # Data samenvoegen op tijdstip
     df = pd.DataFrame()
