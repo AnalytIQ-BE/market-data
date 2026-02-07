@@ -5,19 +5,19 @@ from plotly.subplots import make_subplots
 from datetime import datetime, timedelta
 
 def generate_cephu_chart():
-    # 1. Data ophalen (ES=F is de E-mini S&P 500 Future, ^GSPC is de SPX Index)
-    # We halen 5 dagen aan 1-minuut data op
+    # 1. Data ophalen (5 dagen om ook in het weekend de laatste actieve data te tonen)
     future = yf.download("ES=F", period="5d", interval="1m", progress=False)
     index = yf.download("^GSPC", period="5d", interval="1m", progress=False)
 
     if future.empty or index.empty:
-        print("Geen data van yfinance. GitHub Action stopt hier.")
-        exit(0)
+        print("Geen data gevonden.")
+        return
 
-    # Data samenvoegen op tijdstip
+    # Data samenvoegen en opschonen
     df = pd.DataFrame()
-    df['MES'] = future['Close']
-    df['SPX'] = index['Close']
+    df['MES'] = future['Close'].values.flatten()
+    df['SPX'] = index['Close'].values.flatten()
+    df.index = future.index
     df = df.dropna()
 
     # 2. Berekeningen
@@ -27,6 +27,8 @@ def generate_cephu_chart():
     last_basis = df['Basis'].iloc[-1]
     avg_basis = df['Basis_MA'].iloc[-1]
     diff = last_basis - avg_basis
+
+    # TIJDZONE FIX: Forceer Belgische tijd (UTC + 1)
     belgian_time = datetime.utcnow() + timedelta(hours=1)
     timestamp = belgian_time.strftime("%B %d, %Y | %H:%M") + " CET"
 
@@ -37,56 +39,38 @@ def generate_cephu_chart():
         tk_title, tk_text, tk_color = "BEARISH BIAS", f"The future is trading {abs(diff):.2f} points below average.", "red"
 
     # 3. Grafiek Setup
-    fig = make_subplots(
-        rows=2, cols=1, 
-        shared_xaxes=True, 
-        vertical_spacing=0.12, 
-        row_heights=[0.65, 0.35]
-    )
-
-    # Kleuren uit Cephu palet
-    ACCENT_RED = "hsl(2, 39, 47)"
-    BG_COLOR = "hsl(0, 0, 96)"
-    GREY_GREEN = "hsl(106, 5, 52)"
+    fig = make_subplots(rows=2, cols=1, shared_xaxes=True, vertical_spacing=0.12, row_heights=[0.65, 0.35])
 
     # Traces
-    fig.add_trace(go.Scatter(x=df.index, y=df['MES'], name="MES Future", line=dict(color=ACCENT_RED, width=2)), row=1, col=1)
-    fig.add_trace(go.Scatter(x=df.index, y=df['SPX'], name="SPX Index", line=dict(color=GREY_GREEN, width=1, dash='dot')), row=1, col=1)
+    fig.add_trace(go.Scatter(x=df.index, y=df['MES'], name="MES", line=dict(color="hsl(2, 39, 47)", width=2)), row=1, col=1)
+    fig.add_trace(go.Scatter(x=df.index, y=df['SPX'], name="SPX", line=dict(color="hsl(106, 5, 52)", width=1, dash='dot')), row=1, col=1)
     fig.add_trace(go.Scatter(x=df.index, y=df['Basis'], fill='tozeroy', line=dict(color="orange", width=0.5), fillcolor='rgba(255, 165, 0, 0.2)'), row=2, col=1)
     fig.add_trace(go.Scatter(x=df.index, y=df['Basis_MA'], line=dict(color="black", width=1.5)), row=2, col=1)
 
-    # 4. Annotaties & Labels
-    # Subplot titels linksonder
+    # 4. Annotaties (Titels onderaan de subplots)
     fig.add_annotation(text="PRICE COMPARISON: FUTURE VS INDEX", xref="paper", yref="paper", x=0, y=1, showarrow=False, font=dict(size=11, color="grey"), xanchor="left", yanchor="bottom")
     fig.add_annotation(text="BASIS ANALYSIS: POINTS DEVIATION", xref="paper", yref="paper", x=0, y=0.35, showarrow=False, font=dict(size=11, color="orange"), xanchor="left", yanchor="bottom")
-    
-    # Update tijd rechtsboven
     fig.add_annotation(text=f"Last updated: {timestamp}", xref="paper", yref="paper", x=1, y=1.08, showarrow=False, font=dict(size=10, color="grey"), xanchor="right")
+    
+    # Key Takeaway
+    fig.add_annotation(text=f"<b>KEY TAKEAWAY:</b> <span style='color:{tk_color}'>{tk_title}</span> — {tk_text}", xref="paper", yref="paper", x=0, y=-0.3, showarrow=False, font=dict(size=15), xanchor="left")
 
-    # Key Takeaway onderaan
-    fig.add_annotation(
-        text=f"<b>Key Takeaway:</b> <span style='color:{tk_color}'>{tk_title}</span> — {tk_text}",
-        xref="paper", yref="paper", x=0, y=-0.3, showarrow=False, font=dict(size=15, family="Helvetica Neue"), xanchor="left", align="left"
-    )
-
-    # 5. Layout & As-instellingen (Geen ticks/streepjes)
+    # 5. Layout & As-instellingen (GEEN TICKS)
     fig.update_layout(
         template="simple_white",
-        paper_bgcolor=BG_COLOR,
-        plot_bgcolor=BG_COLOR,
+        paper_bgcolor="hsl(0, 0, 96)",
+        plot_bgcolor="hsl(0, 0, 96)",
         margin=dict(l=50, r=20, t=100, b=150),
         showlegend=False,
-        hovermode="x unified",
         font=dict(family="Helvetica Neue", size=16)
     )
 
+    # Verwijder streepjes (ticks) op beide assen
     fig.update_xaxes(showline=False, showgrid=False, zeroline=False, ticks="")
     fig.update_yaxes(showline=False, showgrid=True, gridcolor="rgba(0,0,0,0.05)", zeroline=False, ticks="")
 
-    # 6. Exporteren met Auto-Refresh Meta Tag
+    # 6. Export met Meta-Refresh (voor Squarespace caching)
     fig.write_html("index.html", include_plotlyjs='cdn', full_html=True)
-    
-    # Voeg meta tag toe voor browser refresh (elke 5 min)
     with open("index.html", "r+") as f:
         content = f.read()
         f.seek(0, 0)
