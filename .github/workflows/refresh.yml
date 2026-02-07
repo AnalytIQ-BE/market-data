@@ -17,7 +17,7 @@ jobs:
       - name: Install dependencies
         run: pip install -r requirements.txt
       - name: Run script
-        run: python je_script.py
+        run: python cephu_analysis.py
         env:
           IBKR_USER: ${{ secrets.IBKR_USER }} # Als je inloggegevens nodig hebt
       - name: Commit and push if changed
