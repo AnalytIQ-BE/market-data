@@ -14,10 +14,8 @@ def generate_cephu_chart():
         return
 
     # Data samenvoegen en opschonen
-    df = pd.DataFrame()
-    df['MES'] = future['Close'].values.flatten()
-    df['SPX'] = index['Close'].values.flatten()
-    df.index = future.index
+    df = pd.merge(future['Close'], index['Close'], left_index=True, right_index=True, how='inner')
+    df.columns = ['MES', 'SPX']
     df = df.dropna()
 
     # 2. Berekeningen
