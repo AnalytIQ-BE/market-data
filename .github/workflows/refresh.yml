@@ -4,7 +4,7 @@ on:
 
   schedule:
 
-    - cron: '*/15 * * * *' # Elke 15 minuten (tijdens beurstijden)
+    - cron: '*/15 14-22 * * 1-5' 
 
   workflow_dispatch: # Hiermee kun je het ook handmatig starten
 
