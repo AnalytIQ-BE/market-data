@@ -65,7 +65,7 @@ def generate_cephu_chart():
 
     # Key Takeaway onderaan
     fig.add_annotation(
-        text=f"<b>KEY TAKEAWAY:</b> <span style='color:{tk_color}'>{tk_title}</span> — {tk_text}",
+        text=f"<b>Key Takeaway:</b> <span style='color:{tk_color}'>{tk_title}</span> — {tk_text}",
         xref="paper", yref="paper", x=0, y=-0.3, showarrow=False, font=dict(size=15, family="Helvetica Neue"), xanchor="left", align="left"
     )
 
