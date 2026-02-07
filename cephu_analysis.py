@@ -27,7 +27,8 @@ def generate_cephu_chart():
     last_basis = df['Basis'].iloc[-1]
     avg_basis = df['Basis_MA'].iloc[-1]
     diff = last_basis - avg_basis
-    timestamp = datetime.now().strftime("%B %d, %Y | %H:%M CET")
+    belgian_time = datetime.utcnow() + timedelta(hours=1)
+    timestamp = belgian_time.strftime("%B %d, %Y | %H:%M") + " CET"
 
     # Takeaway logica
     if last_basis > avg_basis:
