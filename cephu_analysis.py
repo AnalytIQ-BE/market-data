@@ -5,9 +5,9 @@ from plotly.subplots import make_subplots
 from datetime import datetime, timedelta
 
 def generate_cephu_chart():
-    # 1. Data ophalen (5 dagen om ook in het weekend de laatste actieve data te tonen)
-    future = yf.download("ES=F", period="5d", interval="1m", progress=False)
-    index = yf.download("^GSPC", period="5d", interval="1m", progress=False)
+    # 1. Data ophalen (2 dagen om ook in het weekend de laatste actieve data te tonen)
+    future = yf.download("ES=F", period="2d", interval="1m", progress=False)
+    index = yf.download("^GSPC", period="2d", interval="1m", progress=False)
 
     if future.empty or index.empty:
         print("Geen data gevonden.")
@@ -53,14 +53,14 @@ def generate_cephu_chart():
     fig.add_annotation(text=f"Last updated: {timestamp}", xref="paper", yref="paper", x=1, y=1.08, showarrow=False, font=dict(size=10, color="grey"), xanchor="right")
     
     # Key Takeaway
-    fig.add_annotation(text=f"<b>KEY TAKEAWAY:</b> <span style='color:{tk_color}'>{tk_title}</span> — {tk_text}", xref="paper", yref="paper", x=0, y=-0.3, showarrow=False, font=dict(size=15), xanchor="left")
+    fig.add_annotation(text=f"<b>Key Takeaway:</b> <span style='color:{tk_color}'>{tk_title}</span> — {tk_text}", xref="paper", yref="paper", x=0, y=-0.12, showarrow=False, font=dict(size=16), xanchor="left")
 
     # 5. Layout & As-instellingen (GEEN TICKS)
     fig.update_layout(
         template="simple_white",
         paper_bgcolor="hsl(0, 0, 96)",
         plot_bgcolor="hsl(0, 0, 96)",
-        margin=dict(l=50, r=20, t=100, b=150),
+        margin=dict(l=50, r=20, t=80, b=80),
         showlegend=False,
         font=dict(family="Helvetica Neue", size=16)
     )
