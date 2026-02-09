@@ -76,12 +76,12 @@ def generate_clean_basis_chart_html():
     last_spx = df_zoom['SPX'].iloc[-1]
     last_basis = df_zoom['Basis'].iloc[-1]
 
-    fig.add_annotation(x=1.01, y=last_es, xref="paper", yref="y1", text=f" ES Futures: {last_es:.2f} ", 
-                       showarrow=False, bgcolor="#26a69a", font=dict(color="white", size=12), xanchor="left")
-    fig.add_annotation(x=1.01, y=last_spx, xref="paper", yref="y1", text=f" SPX Index: {last_spx:.2f} ", 
-                       showarrow=False, bgcolor="#ef5350", font=dict(color="white", size=12), xanchor="left", yshift=-25)
-    fig.add_annotation(x=1.01, y=last_basis, xref="paper", yref="y2", text=f" Spread: {last_basis:.1f} pts ", 
-                       showarrow=False, bgcolor="#7B1FA2", font=dict(color="white", size=12), xanchor="left")
+    fig.add_annotation(x=0.95, y=last_es, xref="paper", yref="y1", text=f" ES Futures: {last_es:.2f} ", 
+                       showarrow=False, bgcolor="#26a69a", font=dict(color="white", size=12), xanchor="right")
+    fig.add_annotation(x=0.95, y=last_spx, xref="paper", yref="y1", text=f" SPX Index: {last_spx:.2f} ", 
+                       showarrow=False, bgcolor="#ef5350", font=dict(color="white", size=12), xanchor="right", yshift=-25)
+    fig.add_annotation(x=0.95, y=last_basis, xref="paper", yref="y2", text=f" Spread: {last_basis:.1f} pts ", 
+                       showarrow=False, bgcolor="#7B1FA2", font=dict(color="white", size=12), xanchor="right")
 
     # --- TITELS & UITLEG ---
     belgian_time = datetime.now(timezone.utc) + timedelta(hours=1)
