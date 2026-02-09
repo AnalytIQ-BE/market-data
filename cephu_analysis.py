@@ -58,9 +58,11 @@ def generate_clean_basis_chart_html():
         template="simple_white", 
         paper_bgcolor="#f5f5f5", # Nu met correcte hex hashtag
         plot_bgcolor="#f5f5f5", 
-        height=900, width=1400, showlegend=False,
-        margin=dict(l=40, r=180, t=120, b=60) # Meer ruimte rechts voor de labels
+        autosize=True, showlegend=False,
+        margin=dict(l=10, r=10, t=100, b=40) # Meer ruimte rechts voor de labels
     )
+    # Voeg dit toe om de grafiekhoogte op mobiel/desktop te regelen via de export
+    config = {'responsive': True}
 
     fig.update_xaxes(showticklabels=False, ticks="", showline=False, row=1, col=1)
     fig.update_xaxes(showticklabels=True, ticks="", linecolor='rgba(0,0,0,0.1)', 
