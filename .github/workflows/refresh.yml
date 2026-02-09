@@ -3,27 +3,29 @@ name: Refresh Cephu Data
 on:
   schedule:
     - cron: '*/15 14-22 * * 1-5' # Elke 15 min tijdens US market hours
-  workflow_dispatch: # Handmatige start knop
+  workflow_dispatch:
 
 jobs:
   build:
     runs-on: ubuntu-latest
-    permissions: # Cruciaal voor het kunnen pushen van de update
+    permissions:
       contents: write
       
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Haal de volledige geschiedenis op, nodig voor rebase
 
       - name: Set up Python
-        uses: actions/setup-python@v5 # Geüpdatet naar v5
+        uses: actions/setup-python@v5
         with:
-          python-version: '3.12' # Verhoogd naar 3.12 voor compatibiliteit
+          python-version: '3.12'
 
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install yfinance pandas plotly
+          pip install yfinance pandas plotly kaleido # Kaleido toegevoegd voor eventuele static exports
 
       - name: Run script
         run: python cephu_analysis.py
@@ -32,6 +34,17 @@ jobs:
         run: |
           git config --global user.name 'Cephu Automation'
           git config --global user.email 'automation@cephu.com'
+          
+          # Controleer of er echt iets veranderd is
           git add index.html
-          git commit -m "Auto-update market data: $(date)" || exit 0
-          git push
+          if git diff --staged --quiet; then
+            echo "Geen wijzigingen gedetecteerd in index.html. Stop actie."
+            exit 0
+          fi
+          
+          git commit -m "Auto-update market data: $(date -u)"
+          
+          # Synchroniseer met de remote om 'rejected' errors te voorkomen
+          git pull --rebase origin main
+          
+          git push origin main
